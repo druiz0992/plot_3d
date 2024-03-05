@@ -1,0 +1,2 @@
+Simple Rust program to read IMU sensor readings from a serial port and plot a box in 3D with the 
+recorded orientation
