@@ -1,4 +1,4 @@
-use gnuplot::{Color, Figure};
+use gnuplot::{Color, Figure, AxesCommon};
 use rand::prelude::*;
 use std::{thread, time};
 use vector3::Vector3;
@@ -9,8 +9,8 @@ use serialport::{DataBits, FlowControl, Parity, StopBits};
 
 mod quaternion;
 
-const SERIAL_PORT_NAME: &str = "/dev/ttyS0";
-const BAUD_RATE: u32 = 9600;
+const SERIAL_PORT_NAME: &str = "/dev/ttyACM0";
+const BAUD_RATE: u32 = 115200;
 const BUFFER_SIZE: usize = 1024;
 
 fn main() -> io::Result<()> {
@@ -43,6 +43,10 @@ fn main() -> io::Result<()> {
     ];
 
     let mut fg = Figure::new();
+    let mut ax = fg.axes3d()
+            .set_x_grid(false)
+            .set_y_grid(false)
+            .set_z_grid(false);
 
     // Open the serial port
     let mut port = serialport::new(SERIAL_PORT_NAME, BAUD_RATE)
@@ -73,12 +77,8 @@ fn main() -> io::Result<()> {
                             parts[1].parse::<f64>(),
                             parts[2].parse::<f64>(),
                             parts[3].parse::<f64>()) {
-                            rotation_quaternion = Quaternion::new(w, x, y, z);
-                        } else {
-                            eprintln!("Error parsing received data");
-                        }
-                    } else {
-                        eprintln!("Received data has an invalid number of parts");
+                              rotation_quaternion = Quaternion::new(w, x, y, z);
+                        } 
                     }
 
                 } 
@@ -96,7 +96,11 @@ fn main() -> io::Result<()> {
 
         // Clear the previous plot
         fg.clear_axes();
-        let ax = fg.axes3d();
+        ax = fg.axes3d()
+        .set_x_grid(false)  // Disable grid for x-axis
+        .set_y_grid(false)  // Disable grid for y-axis
+        .set_z_grid(false); // Disable grid for z-axis
+
 
         // Rotate the vertices
         let mut rotated_vertices = vec![];
